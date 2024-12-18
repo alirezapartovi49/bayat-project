@@ -114,6 +114,9 @@ class Game {
       this.goToNextLevel();
     } else {
       this.retries ++;
+      this.score -= 2;
+
+      document.getElementById("score").innerText = this.score.toString();
       if (this.retries > 3) {
         alert("انقد اشتباه زدی باختی! کلا از اول")
         this.resetGame();
@@ -122,7 +125,7 @@ class Game {
         this.selected_items = [];
         document.getElementById("retries").innerText = this.retries.toString();
         document.getElementsByClassName("board-item").forEach((el) => {
-          el.style.borderColor = "rgb(159, 159, 255)";
+          el.style.borderColor = "rrgb(31, 180, 180)";
         })
       }
     }
@@ -135,20 +138,20 @@ class Game {
         el.classList.add("board-item");
         el.innerText = this.matrix[i][j];
         el.onclick = () => {
-          if (el.style.borderColor == "green") {
+          if (el.style.borderColor == "rgb(228, 182, 0)") {
             this.selected_items = this.selected_items.filter(
               (val) => {
                 return val[0] !== i || val[1] !== j;
               }
             );
-            el.style.borderColor = "rgb(159, 159, 255)";
+            el.style.borderColor = "rgb(31, 180, 180)";
           } else {
             if (this.selected_items.length >= 4) {
               alert("نمیتوان بیشتر از این انتخاب کرد");
               this.checkAnswer();
             } else {
               this.selected_items.push([i, j]);
-              el.style.borderColor = "green";
+              el.style.borderColor = "rgb(228, 182, 0)";
             }
           }
         };
