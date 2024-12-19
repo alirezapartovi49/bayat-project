@@ -148,7 +148,7 @@ class Game {
                 return val[0] !== i || val[1] !== j;
               }
             );
-            el.style.borderColor = "rgb(31, 180, 180)";
+            el.style.borderColor = "rgb(159, 159, 255)";
           } else {
             if (this.selected_items.length >= 4) {
               alert("نمیتوان بیشتر از این انتخاب کرد");
