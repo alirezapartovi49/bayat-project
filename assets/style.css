@@ -1,7 +1,13 @@
+@font-face {
+  font-family: Dana;
+  src: url("../fonts/DanaFaNum-Regular.woff2");
+}
+
 :root {
   margin: 0;
   padding: 0;
   color: rgb(205, 205, 205);
+  font-family: Dana;
 }
 
 body {
@@ -41,13 +47,13 @@ header {
 
 .head {
   /* height: 100vh; */
-  width: 30%;
+  width: 35%;
 }
 
 .head {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   /* grid-template-columns: repeat(2, 50px); */
 }
 
@@ -77,10 +83,10 @@ header {
   bottom: 0;
   left: -100%;
   white-space: nowrap;
-  animation: move 15s linear infinite;
+  /* animation: move 30s linear infinite; */
 }
 
-@keyframes move {
+/* @keyframes move {
   0% {
     left: -100%;
   }
@@ -95,4 +101,4 @@ p {
   color: #858585;
   margin: 0;
   direction: rtl;
-}
+} */

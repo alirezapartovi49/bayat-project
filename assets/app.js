@@ -8,7 +8,11 @@ class Game {
     this.matrix = [];
     this.maxZarb = 0;
     this.maxIndices = [];
+    this.time = 10;
+    this.timeInterval = null;
     this.board = document.getElementById("board");
+
+    this.createBoard();
   }
 
   createBoard() {
@@ -16,6 +20,7 @@ class Game {
     this.generateMatrix();
     this.findMaxZarb();
     this.showMatrix();
+    this.timeHandler();
   }
 
   setupBoard() {
@@ -26,11 +31,7 @@ class Game {
   }
 
   generateMatrix() {
-    this.matrix = Array.from({ length: this.boardSize }, () =>
-      Array.from({ length: this.boardSize }, () =>
-        Math.trunc(Math.random() * (this.boardSize * this.boardSize) + 1)
-      )
-    );
+    this.matrix = Array.from({ length: this.boardSize }, () => Array.from({ length: this.boardSize }, () => Math.trunc(Math.random() * (this.boardSize * this.boardSize) + 1)));
   }
 
   findMaxZarb() {
@@ -47,13 +48,37 @@ class Game {
 
   checkDirection(i, j, minusBoard) {
     // Check horizontal
-    if (j <= minusBoard) this.checkProduct(i, j, [[0, 0], [0, 1], [0, 2], [0, 3]]);
+    if (j <= minusBoard)
+      this.checkProduct(i, j, [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [0, 3],
+      ]);
     // Check vertical
-    if (i <= minusBoard) this.checkProduct(i, j, [[0, 0], [1, 0], [2, 0], [3, 0]]);
+    if (i <= minusBoard)
+      this.checkProduct(i, j, [
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [3, 0],
+      ]);
     // Check diagonal left to right
-    if (i <= minusBoard && j <= minusBoard) this.checkProduct(i, j, [[0, 0], [1, 1], [2, 2], [3, 3]]);
+    if (i <= minusBoard && j <= minusBoard)
+      this.checkProduct(i, j, [
+        [0, 0],
+        [1, 1],
+        [2, 2],
+        [3, 3],
+      ]);
     // Check diagonal right to left
-    if (i <= minusBoard && j >= 3) this.checkProduct(i, j, [[0, 0], [1, -1], [2, -2], [3, -3]]);
+    if (i <= minusBoard && j >= 3)
+      this.checkProduct(i, j, [
+        [0, 0],
+        [1, -1],
+        [2, -2],
+        [3, -3],
+      ]);
   }
 
   checkProduct(i, j, offsets) {
@@ -74,7 +99,7 @@ class Game {
     }
   }
 
-  handleIncorrectAnswer() {
+  handleIncorrectAnswer(timeout = false) {
     this.retries++;
     this.score -= 2;
     document.getElementById("score").innerText = this.score.toString();
@@ -83,7 +108,9 @@ class Game {
       alert("انقد اشتباه زدی باختی! کلا از اول");
       this.resetGame();
     } else {
-      alert("جوابت غلط بود یه بار دیگه تلاش کن");
+      if (timeout) {
+        alert("زمانت تموم شد یبار دیگه تلاش کن")
+      } else alert("جوابت غلط بود یه بار دیگه تلاش کن");
       this.resetSelectedItems();
       document.getElementById("retries").innerText = this.retries.toString();
     }
@@ -114,13 +141,11 @@ class Game {
 
   handleItemClick(el, i, j) {
     if (el.style.borderColor === "rgb(228, 182, 0)") {
-      this.selectedItems = this.selectedItems.filter(
-        (val) => val[0] !== i || val[1] !== j
-      );
+      this.selectedItems = this.selectedItems.filter((val) => val[0] !== i || val[1] !== j);
       el.style.borderColor = "rgb(159, 159, 255)";
     } else {
-      if (this.selectedItems.length >= 4) {
-        alert("نمیتوان بیشتر از این انتخاب کرد");
+      if (this.selectedItems.length === 3) {
+        // alert("نمیتوان بیشتر از این انتخاب کرد");
         this.checkAnswer();
       } else {
         this.selectedItems.push([i, j]);
@@ -151,17 +176,69 @@ class Game {
     document.getElementById("retries").innerText = this.retries.toString();
   }
 
+
+  downLevelScore() {
+    this.score -= this.level * 2 + 2;
+    this.retries ++;
+    this.level--;
+    document.getElementById("score").innerText = this.score.toString();
+    document.getElementById("level").innerText = this.level.toString();
+    document.getElementById("retries").innerText = this.retries.toString();
+  }
+
   goToNextLevel() {
     if (this.boardSize < 9) {
       this.boardSize++;
       this.selectedItems = [];
+      this.time = 10;
+      clearInterval(this.timeInterval);
       this.upLevelScore();
       this.createBoard();
     } else {
       alert("مراحل تمام شده است");
     }
   }
+
+  goToPrevLevel() {
+    if (this.boardSize > 4) {
+      this.boardSize--;
+      this.selectedItems = [];
+      this.time = 10;
+      clearInterval(this.timeInterval);
+      this.downLevelScore();
+      this.createBoard();
+    } else {
+      clearInterval(this.timeInterval);
+      alert("مراحل تمام شده است");
+    }
+  }
+
+  timeHandler() {
+    this.timeElem = document.querySelector("#time-label");
+    this.topHead__timeElem = document.querySelector(".top-head__time-elem");
+
+    this.timeElem.innerHTML = this.time;
+    this.timeInterval = setInterval(() => {
+      if (this.time > 0) {
+        this.time--;
+        this.timeElem.innerHTML = this.time;
+
+        if (this.time < 4) {
+          this.topHead__timeElem.style.borderColor = "red";
+        } else {
+          this.topHead__timeElem.style.borderColor = "rgb(31, 180, 180)";
+        }
+      } else {
+        if (this.score > 0) {
+          // this.handleIncorrectAnswer();
+          this.goToPrevLevel();
+        } else {
+          clearInterval(this.timeInterval);
+          this.handleIncorrectAnswer(true);
+        }
+      }
+    }, 1000);
+  }
 }
 
 const game = new Game(1);
-game.createBoard();
