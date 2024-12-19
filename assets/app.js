@@ -125,7 +125,7 @@ class Game {
         this.selected_items.forEach((val) => {
           const el = this.board.children[val[0] * this.board_size + val[1]];
           if (el) {
-            el.style.borderColor = "rgb(31, 180, 180)";
+            el.style.borderColor = "rgb(159, 159, 255)";
           }
         });
         this.selected_items = [];
