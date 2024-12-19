@@ -1,167 +1,130 @@
 class Game {
-  selected_items = [];
-  level = 0;
-  score = 0;
-  retries = 0;
-
   constructor(level) {
+    this.selectedItems = [];
     this.level = level;
-    this.board_size = level + 3;
+    this.score = 0;
+    this.retries = 0;
+    this.boardSize = level + 3;
+    this.matrix = [];
+    this.maxZarb = 0;
+    this.maxIndices = [];
+    this.board = document.getElementById("board");
   }
 
   createBoard() {
-    this.createBoardObject();
+    this.setupBoard();
     this.generateMatrix();
-    this.findMaxMazrab();
+    this.findMaxZarb();
     this.showMatrix();
   }
 
-  createBoardObject() {
-    this.board = document.getElementById("board");
+  setupBoard() {
     this.board.innerHTML = "";
     this.board.style.display = "grid";
-    this.board.style.gridTemplateColumns = `repeat(${this.board_size}, 50px)`;
-    this.board.style.gridTemplateRows = `repeat(${this.board_size}, 50px)`;
+    this.board.style.gridTemplateColumns = `repeat(${this.boardSize}, 50px)`;
+    this.board.style.gridTemplateRows = `repeat(${this.boardSize}, 50px)`;
   }
 
   generateMatrix() {
-    this.matrix = [];
-    for (let i = 0; i < this.board_size; i++) {
-      this.matrix[i] = []; // ایجاد زیرآرایه برای هر ردیف
-      for (let j = 0; j < this.board_size; j++) {
-        let raned_number = Math.random() * (this.board_size * this.board_size) + 1;
-        this.matrix[i][j] = Math.trunc(raned_number);
+    this.matrix = Array.from({ length: this.boardSize }, () =>
+      Array.from({ length: this.boardSize }, () =>
+        Math.trunc(Math.random() * (this.boardSize * this.boardSize) + 1)
+      )
+    );
+  }
+
+  findMaxZarb() {
+    this.maxZarb = 0;
+    this.maxIndices = [];
+    const minusBoard = this.boardSize - 4;
+
+    for (let i = 0; i < this.boardSize; i++) {
+      for (let j = 0; j < this.boardSize; j++) {
+        this.checkDirection(i, j, minusBoard);
       }
     }
   }
 
-  findMaxMazrab() {
-    this.max_zarb = 0;
-    this.max_indices = [];
-    let minus_board = this.board_size - 4;
+  checkDirection(i, j, minusBoard) {
+    // Check horizontal
+    if (j <= minusBoard) this.checkProduct(i, j, [[0, 0], [0, 1], [0, 2], [0, 3]]);
+    // Check vertical
+    if (i <= minusBoard) this.checkProduct(i, j, [[0, 0], [1, 0], [2, 0], [3, 0]]);
+    // Check diagonal left to right
+    if (i <= minusBoard && j <= minusBoard) this.checkProduct(i, j, [[0, 0], [1, 1], [2, 2], [3, 3]]);
+    // Check diagonal right to left
+    if (i <= minusBoard && j >= 3) this.checkProduct(i, j, [[0, 0], [1, -1], [2, -2], [3, -3]]);
+  }
 
-    for (let i = 0; i < this.board_size; i++) {
-      for (let j = 0; j < this.board_size; j++) {
-        if (j <= minus_board) {
-          // بررسی افقی
-          let zarb =
-            this.matrix[i][j] *
-            this.matrix[i][j + 1] *
-            this.matrix[i][j + 2] *
-            this.matrix[i][j + 3];
-          if (zarb > this.max_zarb) {
-            this.max_zarb = zarb;
-            this.max_indices = [(i, j), (i, j + 1), (i, j + 2), (i, j + 3)];
-          }
-        }
-        if (i <= minus_board) {
-          // بررسی عمودی
-          let zarb =
-            this.matrix[i][j] *
-            this.matrix[i + 1][j] *
-            this.matrix[i + 2][j] *
-            this.matrix[i + 3][j];
-          if (zarb > this.max_zarb) {
-            this.max_zarb = zarb;
-            this.max_indices = [(i, j), (i + 1, j), (i + 2, j), (i + 3, j)];
-          }
-        }
-        if (i <= minus_board && j <= minus_board) {
-          // بررسی مورب چپ به راست
-          let zarb =
-            this.matrix[i][j] *
-            this.matrix[i + 1][j + 1] *
-            this.matrix[i + 2][j + 2] *
-            this.matrix[i + 3][j + 3];
-          if (zarb > this.max_zarb) {
-            this.max_zarb = zarb;
-            this.max_indices = [
-              (i, j),
-              (i + 1, j + 1),
-              (i + 2, j + 2),
-              (i + 3, j + 3),
-            ];
-          }
-        }
-        if (i <= minus_board && j >= 3) {
-          // بررسی مورب راست به چپ
-          let zarb =
-            this.matrix[i][j] *
-            this.matrix[i + 1][j - 1] *
-            this.matrix[i + 2][j - 2] *
-            this.matrix[i + 3][j - 3];
-          if (zarb > this.max_zarb) {
-            this.max_zarb = zarb;
-            this.max_indices = [
-              (i, j),
-              (i + 1, j - 1),
-              (i + 2, j - 2),
-              (i + 3, j - 3),
-            ];
-          }
-        }
-      }
+  checkProduct(i, j, offsets) {
+    const product = offsets.reduce((acc, [di, dj]) => acc * this.matrix[i + di][j + dj], 1);
+    if (product > this.maxZarb) {
+      this.maxZarb = product;
+      this.maxIndices = offsets.map(([di, dj]) => [i + di, j + dj]);
     }
   }
 
   checkAnswer() {
-    let result = true;
-    this.selected_items.forEach((val) => {
-      if (result) if (this.max_indices[val[0]] != val[1]) result = false;
-    });
+    const isCorrect = this.selectedItems.every((val) => this.maxIndices.some((index) => index[0] === val[0] && index[1] === val[1]));
 
-    if (result) {
+    if (isCorrect) {
       this.goToNextLevel();
     } else {
-      this.retries++;
-      this.score -= 2;
-
-      document.getElementById("score").innerText = this.score.toString();
-      if (this.retries > 3) {
-        alert("انقد اشتباه زدی باختی! کلا از اول");
-        this.resetGame();
-      } else {
-        alert("جوابت غلط بود یه بار دیگه تلاش کن");
-        this.selected_items.forEach((val) => {
-          const el = this.board.children[val[0] * this.board_size + val[1]];
-          if (el) {
-            el.style.borderColor = "rgb(159, 159, 255)";
-          }
-        });
-        this.selected_items = [];
-        document.getElementById("retries").innerText = this.retries.toString();
-      }
+      this.handleIncorrectAnswer();
     }
   }
 
+  handleIncorrectAnswer() {
+    this.retries++;
+    this.score -= 2;
+    document.getElementById("score").innerText = this.score.toString();
+
+    if (this.retries > 3) {
+      alert("انقد اشتباه زدی باختی! کلا از اول");
+      this.resetGame();
+    } else {
+      alert("جوابت غلط بود یه بار دیگه تلاش کن");
+      this.resetSelectedItems();
+      document.getElementById("retries").innerText = this.retries.toString();
+    }
+  }
+
+  resetSelectedItems() {
+    this.selectedItems.forEach((val) => {
+      const el = this.board.children[val[0] * this.boardSize + val[1]];
+      if (el) {
+        el.style.borderColor = "rgb(159, 159, 255)";
+      }
+    });
+    this.selectedItems = [];
+  }
 
   showMatrix() {
-    for (let i = 0; i < this.board_size; i++) {
-      for (let j = 0; j < this.board_size; j++) {
-        let el = document.createElement("div");
+    this.matrix.forEach((row, i) => {
+      row.forEach((value, j) => {
+        const el = document.createElement("div");
         el.classList.add("board-item");
-        el.innerText = this.matrix[i][j];
-        el.onclick = () => {
-          if (el.style.borderColor == "rgb(228, 182, 0)") {
-            this.selected_items = this.selected_items.filter(
-              (val) => {
-                return val[0] !== i || val[1] !== j;
-              }
-            );
-            el.style.borderColor = "rgb(159, 159, 255)";
-          } else {
-            if (this.selected_items.length >= 4) {
-              alert("نمیتوان بیشتر از این انتخاب کرد");
-              this.checkAnswer();
-            } else {
-              this.selected_items.push([i, j]);
-              el.style.borderColor = "rgb(228, 182, 0)";
-            }
-          }
-        };
-
+        el.innerText = value;
+        el.onclick = () => this.handleItemClick(el, i, j);
         this.board.appendChild(el);
-        document.getElementById("multiplied").innerText = this.max_zarb.toString();
+      });
+    });
+    document.getElementById("multiplied").innerText = this.maxZarb.toString();
+  }
+
+  handleItemClick(el, i, j) {
+    if (el.style.borderColor === "rgb(228, 182, 0)") {
+      this.selectedItems = this.selectedItems.filter(
+        (val) => val[0] !== i || val[1] !== j
+      );
+      el.style.borderColor = "rgb(159, 159, 255)";
+    } else {
+      if (this.selectedItems.length >= 4) {
+        alert("نمیتوان بیشتر از این انتخاب کرد");
+        this.checkAnswer();
+      } else {
+        this.selectedItems.push([i, j]);
+        el.style.borderColor = "rgb(228, 182, 0)";
       }
     }
   }
@@ -169,13 +132,13 @@ class Game {
   resetGame() {
     this.score = 0;
     this.retries = 0;
-    this.level = 0;
-    this.selected_items = [];
-
+    this.level = 1;
+    this.selectedItems = [];
+    this.maxZarb = 0;
+    this.maxIndices = [];
     document.getElementById("score").innerText = this.score.toString();
     document.getElementById("level").innerText = this.level.toString();
     document.getElementById("retries").innerText = this.retries.toString();
-
     this.createBoard();
   }
 
@@ -183,16 +146,15 @@ class Game {
     this.score += this.level * 2 + 2;
     this.retries = 0;
     this.level++;
-
     document.getElementById("score").innerText = this.score.toString();
     document.getElementById("level").innerText = this.level.toString();
     document.getElementById("retries").innerText = this.retries.toString();
   }
 
   goToNextLevel() {
-    if (this.board_size < 9) {
-      this.board_size++;
-      this.selected_items = [];
+    if (this.boardSize < 9) {
+      this.boardSize++;
+      this.selectedItems = [];
       this.upLevelScore();
       this.createBoard();
     } else {
