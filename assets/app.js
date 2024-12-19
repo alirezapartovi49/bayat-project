@@ -113,23 +113,27 @@ class Game {
     if (result) {
       this.goToNextLevel();
     } else {
-      this.retries ++;
+      this.retries++;
       this.score -= 2;
 
       document.getElementById("score").innerText = this.score.toString();
       if (this.retries > 3) {
-        alert("انقد اشتباه زدی باختی! کلا از اول")
+        alert("انقد اشتباه زدی باختی! کلا از اول");
         this.resetGame();
       } else {
-        alert("جوابت غلط بود یه بار دیگه تلاش کن")
+        alert("جوابت غلط بود یه بار دیگه تلاش کن");
+        this.selected_items.forEach((val) => {
+          const el = this.board.children[val[0] * this.board_size + val[1]];
+          if (el) {
+            el.style.borderColor = "rgb(31, 180, 180)";
+          }
+        });
         this.selected_items = [];
         document.getElementById("retries").innerText = this.retries.toString();
-        document.getElementsByClassName("board-item").forEach((el) => {
-          el.style.borderColor = "rrgb(31, 180, 180)";
-        })
       }
     }
   }
+
 
   showMatrix() {
     for (let i = 0; i < this.board_size; i++) {
@@ -155,7 +159,7 @@ class Game {
             }
           }
         };
-        
+
         this.board.appendChild(el);
         document.getElementById("multiplied").innerText = this.max_zarb.toString();
       }
@@ -178,7 +182,7 @@ class Game {
   upLevelScore() {
     this.score += this.level * 2 + 2;
     this.retries = 0;
-    this.level ++;
+    this.level++;
 
     document.getElementById("score").innerText = this.score.toString();
     document.getElementById("level").innerText = this.level.toString();
