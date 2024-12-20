@@ -137,6 +137,7 @@ class Game {
     } else {
       if (timeout) {
         this.notyf.error("زمانت تموم شد یبار دیگه تلاش کن")
+        this.timeHandler();
       } else this.notyf.error("جوابت غلط بود یه بار دیگه تلاش کن");
       this.resetSelectedItems();
       document.getElementById("retries").innerText = this.retries.toString();
@@ -244,8 +245,13 @@ class Game {
     this.timeElem = document.querySelector("#time-label");
     this.topHead__timeElem = document.querySelector(".top-head__time-elem");
 
+    if (this.time === 0) {
+      this.time = 10;
+      this.timeElem.innerHTML = this.time;
+    }
+
     this.timeElem.innerHTML = this.time;
-    this.timeInterval = setInterval(() => {
+    this.timeIntervalAction = () => {
       if (this.time > 0) {
         this.time--;
         this.timeElem.innerHTML = this.time;
@@ -264,7 +270,8 @@ class Game {
           this.handleIncorrectAnswer(true);
         }
       }
-    }, 1000);
+    }
+    this.timeInterval = setInterval(this.timeIntervalAction, 1000);
   }
 }
 
