@@ -11,8 +11,35 @@ class Game {
     this.time = 10;
     this.timeInterval = null;
     this.board = document.getElementById("board");
-
+    
+    this.setupNotyf();
     this.createBoard();
+  }
+
+  setupNotyf() {
+    this.notyf = new Notyf({
+      position: {
+        x: 'center',
+        y: 'top',
+      },
+      types: [
+        {
+          type: 'warning',
+          background: 'orange',
+          icon: {
+            className: 'material-icons',
+            tagName: 'i',
+            text: 'warning'
+          }
+        },
+        {
+          type: 'error',
+          background: 'indianred',
+          duration: 2000,
+          dismissible: true
+        }
+      ]
+    });
   }
 
   createBoard() {
@@ -105,12 +132,12 @@ class Game {
     document.getElementById("score").innerText = this.score.toString();
 
     if (this.retries > 3) {
-      alert("انقد اشتباه زدی باختی! کلا از اول");
+      this.notyf.error("انقد اشتباه زدی باختی! کلا از اول");
       this.resetGame();
     } else {
       if (timeout) {
-        alert("زمانت تموم شد یبار دیگه تلاش کن")
-      } else alert("جوابت غلط بود یه بار دیگه تلاش کن");
+        this.notyf.error("زمانت تموم شد یبار دیگه تلاش کن")
+      } else this.notyf.error("جوابت غلط بود یه بار دیگه تلاش کن");
       this.resetSelectedItems();
       document.getElementById("retries").innerText = this.retries.toString();
     }
@@ -195,7 +222,7 @@ class Game {
       this.upLevelScore();
       this.createBoard();
     } else {
-      alert("مراحل تمام شده است");
+      this.notyf.error("مراحل تمام شده");
     }
   }
 
@@ -209,7 +236,7 @@ class Game {
       this.createBoard();
     } else {
       clearInterval(this.timeInterval);
-      alert("مراحل تمام شده است");
+      this.notyf.error("مراحل تمام شده است");
     }
   }
 
