@@ -11,7 +11,7 @@ class Game {
     this.time = 10;
     this.timeInterval = null;
     this.board = document.getElementById("board");
-    
+
     this.setupNotyf();
     this.createBoard();
   }
@@ -35,6 +35,7 @@ class Game {
         {
           type: 'error',
           background: 'indianred',
+          className: 'notif',
           duration: 2000,
           dismissible: true
         }
@@ -207,7 +208,7 @@ class Game {
 
   downLevelScore() {
     this.score -= this.level * 2 + 2;
-    this.retries ++;
+    this.retries++;
     this.level--;
     document.getElementById("score").innerText = this.score.toString();
     document.getElementById("level").innerText = this.level.toString();

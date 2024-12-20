@@ -86,6 +86,12 @@ header {
   /* animation: move 30s linear infinite; */
 }
 
+.notyf {
+  border-radius: 10px;
+  text-align: center;
+  direction: rtl;
+}
+
 /* @keyframes move {
   0% {
     left: -100%;
