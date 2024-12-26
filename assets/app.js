@@ -118,6 +118,11 @@ class Game {
   }
 
   checkAnswer() {
+    if (this.selectedItems.length !== 4) {
+      this.notyf.error("لطفا ۴ آیتم انتخاب کنید.");
+      return;
+    }
+
     const isCorrect = this.selectedItems.every((val) => this.maxIndices.some((index) => index[0] === val[0] && index[1] === val[1]));
 
     if (isCorrect) {
@@ -173,15 +178,32 @@ class Game {
       this.selectedItems = this.selectedItems.filter((val) => val[0] !== i || val[1] !== j);
       el.style.borderColor = "rgb(159, 159, 255)";
     } else {
-      if (this.selectedItems.length === 3) {
-        // alert("نمیتوان بیشتر از این انتخاب کرد");
+      if (this.selectedItems.length === 4) {
         this.checkAnswer();
       } else {
-        this.selectedItems.push([i, j]);
-        el.style.borderColor = "rgb(228, 182, 0)";
+        if (this.selectedItems.length === 0) {
+          // اگر هیچ آیتمی انتخاب نشده باشد، آیتم جدید را انتخاب کنید
+          this.selectedItems.push([i, j]);
+          el.style.borderColor = "rgb(228, 182, 0)";
+        } else {
+          const [firstI, firstJ] = this.selectedItems[0];
+          const isSameRow = firstI === i; // بررسی افقی
+          const isSameCol = firstJ === j; // بررسی عمودی
+          const isDiagonal = Math.abs(firstI - i) === Math.abs(firstJ - j); // بررسی مورب
+
+          // اگر انتخاب جدید در راستای انتخاب‌های قبلی باشد
+          if (isSameRow || isSameCol || isDiagonal) {
+            this.selectedItems.push([i, j]);
+            el.style.borderColor = "rgb(228, 182, 0)";
+          } else {
+            this.notyf.error("لطفا آیتم‌ها را در یک راستا انتخاب کنید.");
+          }
+        }
       }
     }
   }
+
+
 
   resetGame() {
     this.score = 0;
