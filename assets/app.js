@@ -137,17 +137,33 @@ class Game {
     this.score -= 2;
     document.getElementById("score").innerText = this.score.toString();
 
+    let timeToAdd = 0;
+
+    if (this.retries === 1) {
+      timeToAdd = 2;
+    } else if (this.retries === 2) {
+      timeToAdd = 5;
+    } else if (this.retries === 3) {
+      timeToAdd = 7;
+    }
+
+    document.getElementById("retries").innerText = this.retries.toString();
+
     if (this.retries > 3) {
       this.notyf.error("انقد اشتباه زدی باختی! کلا از اول");
       this.resetGame();
     } else {
       if (timeout) {
-        this.notyf.error("زمانت تموم شد یبار دیگه تلاش کن")
+        this.notyf.error("زمانت تموم شد یبار دیگه تلاش کن");
         this.timeHandler();
-      } else this.notyf.error("جوابت غلط بود یه بار دیگه تلاش کن");
-      this.resetSelectedItems();
-      document.getElementById("retries").innerText = this.retries.toString();
+      } else {
+        this.notyf.error("جوابت غلط بود یه بار دیگه تلاش کن");
+        this.resetSelectedItems();
+      }
     }
+
+    this.time += timeToAdd;
+    document.getElementById("time-label").innerText = this.time.toString();
   }
 
   resetSelectedItems() {
@@ -182,19 +198,21 @@ class Game {
         this.checkAnswer();
       } else {
         if (this.selectedItems.length === 0) {
-          // اگر هیچ آیتمی انتخاب نشده باشد، آیتم جدید را انتخاب کنید
           this.selectedItems.push([i, j]);
           el.style.borderColor = "rgb(228, 182, 0)";
         } else {
           const [firstI, firstJ] = this.selectedItems[0];
-          const isSameRow = firstI === i; // بررسی افقی
-          const isSameCol = firstJ === j; // بررسی عمودی
-          const isDiagonal = Math.abs(firstI - i) === Math.abs(firstJ - j); // بررسی مورب
+          const isSameRow = firstI === i;
+          const isSameCol = firstJ === j;
+          const isDiagonal = Math.abs(firstI - i) === Math.abs(firstJ - j);
 
-          // اگر انتخاب جدید در راستای انتخاب‌های قبلی باشد
           if (isSameRow || isSameCol || isDiagonal) {
             this.selectedItems.push([i, j]);
             el.style.borderColor = "rgb(228, 182, 0)";
+
+            if (this.selectedItems.length === 4) {
+              this.checkAnswer();
+            }
           } else {
             this.notyf.error("لطفا آیتم‌ها را در یک راستا انتخاب کنید.");
           }
@@ -202,7 +220,6 @@ class Game {
       }
     }
   }
-
 
 
   resetGame() {
@@ -274,6 +291,11 @@ class Game {
     }
 
     this.timeElem.innerHTML = this.time;
+
+    if (this.timeInterval) {
+      clearInterval(this.timeInterval);
+    }
+
     this.timeIntervalAction = () => {
       if (this.time > 0) {
         this.time--;
@@ -286,7 +308,6 @@ class Game {
         }
       } else {
         if (this.score > 0) {
-          // this.handleIncorrectAnswer();
           this.goToPrevLevel();
         } else {
           clearInterval(this.timeInterval);
